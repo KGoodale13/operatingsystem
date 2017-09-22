@@ -70,22 +70,37 @@ int getOperandIndex( int index ){
  */
 short int getOperandType( int operandIndex ){
 
-    if( operandIndex > 2 || operandIndex < 1 ){
-        printf("ERROR: Invalid operand index passed to getOperandType. Expected 1 or 2 got: %i\n", operandIndex );
+    if( operandIndex > 6 || operandIndex < 2 ){
+        printf("ERROR: Invalid operand index passed to getOperandType. Expected 1 - 4 got: %i\n", operandIndex );
         return -1;
     }
-    return charToOperandType( IR[ operandIndex * 2 ] );
+    return charToOperandType( IR[ operandIndex  ] );
 }
 
 
 // Verifies the operand at that index is the correct type.
 // Prints an error and returns -1 if not. Else returns 0
 int checkOperandType( int index, short int expectedTypeEnum ) {
+    index = index * 2;
     short int operandType = getOperandType( index );
+    short int operandValue = getOperandType( index + 1 );
+    // Check the operand type i.e the 'P' in 'P0'
     if( operandType != expectedTypeEnum ){
         printf( "Error: Invalid operand %i. Expected %i, Got %i\n", index, expectedTypeEnum, operandType );
         return -1;
     }
+
+    // If its a register or pointer the value should be {0-9}
+    if( expectedTypeEnum == OPERAND_POINTER || expectedTypeEnum == OPERAND_REGISTER ) {
+        if( operandValue != OPERAND_NUMBER  ) {
+            printf( "Error: Invalid value for operand %i. Expected %i, Got %i\n", index, expectedTypeEnum, operandType );
+            return -1;
+        }
+    } else if( operandValue != expectedTypeEnum ) { // Nulls and numbers come in pairs so ZZ or XX
+        printf( "Error: Invalid value for operand %i. Expected %i, Got %i\n", index, expectedTypeEnum, operandType );
+        return -1;
+    }
+
     return 0;
 }
 
@@ -111,8 +126,8 @@ int OP3( ){
 }
 
 int OP4( ){
-    return checkOperandType( 1, OPERAND_NUMBER ) == 0 ?
-           setAccumulator( getPointer( getOperand1() ) ) : -1;
+    return checkOperandType( 1, OPERAND_POINTER ) == 0 ?
+           setAccumulator( getPointerMemoryValue( getOperandIndex(1) ) ) : -1;
 }
 
 int OP5( ){
@@ -180,12 +195,12 @@ int OP17() {
 }
 
 int OP18() {
-    return checkOperandType( 1, OPERAND_NUMBER ) == 0 ?
+    return checkOperandType( 1, OPERAND_REGISTER ) == 0 ?
            addAccumulator( getRegister( getOperandIndex(1) ) ) : -1;
 }
 
 int OP19() {
-    return checkOperandType( 1, OPERAND_NUMBER ) == 0 ?
+    return checkOperandType( 1, OPERAND_REGISTER ) == 0 ?
            subtractAccumulator( getRegister( getOperandIndex(1) ) ) : -1;
 }
 
@@ -254,16 +269,19 @@ int OP32() {
            setPSW( accCompare( getRegister(getOperandIndex(1)), COMPARISON_GREATER ) ) : -1;
 }
 
-int OP33(){
-    return branch( getPSW() );
+int OP33() {
+    return checkOperandType( 1, OPERAND_NUMBER ) == 0 ?
+           ( getPSW() == 1 ? branch( getOperand1() ) : 0 ) : -1;
 }
 
-int OP34(){
-    return branch( getPSW() );
+int OP34() {
+    return checkOperandType( 1, OPERAND_NUMBER ) == 0 ?
+           branch( getOperand1() ) : -1;
 }
 
-int OP35(){
-    return branch( getPSW() );
+int OP35() {
+    return checkOperandType( 1, OPERAND_NUMBER ) == 0 ?
+           ( getPSW() == 1 ? branch( getOperand1() ) : 0 ) : -1;
 }
 
 

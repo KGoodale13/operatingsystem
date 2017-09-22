@@ -192,6 +192,6 @@ int branch( short int line ){
         printf("Error: Invalid line passed to branch. Expected 0-99, Got: %i\n", line);
         return -1;
     }
-    PC = line;
+    PC = line - 1; // Because we increase the PC after this opcode completes
     return 0;
 }
