@@ -17,14 +17,25 @@
 
 int main( int argc, char* argv[] ) {
 
-    char *programFolder = argv[0]; // Get the path to our exe
-    programFolder = dirname( dirname( programFolder ) ); // Remove the exe from the path, and the bin folder (cd ../../)
-    strcat( programFolder, "/programs/Program1" ); // Add the programs directory to the path (cd programs)
-    printf( "Attempting to load program: %s\n", programFolder );
+    int argIndex = 0; // Current index we are trying
+    int fileLoaded = false; // Whether we loaded a file
 
-    if( loadFile( programFolder ) == -1 ) { // Load the file into main memory
-        return -1; // We didn't load the file so kill it
+    // Attempt to load a program from a path passed as a launch arg
+    while( argIndex < argc && !fileLoaded ) {
+        char *programFile = argv[ argIndex ];
+        printf( "Attempting to load program: %s\n", programFile );
+
+        if( loadFile( programFile ) == 0 ) { // Load the file into main memory
+            fileLoaded = true;
+        }
+        argIndex++;
     }
+
+    if( !fileLoaded ){
+        printf( "ERROR: No valid program found in launch arguments. Unable to continue. Terminating....\n" );
+        return -1;
+    }
+
     PC = 0; // Reset the program counter to the beginning of the program
 
     while ( true ) { // OS loop
@@ -36,7 +47,7 @@ int main( int argc, char* argv[] ) {
             dumpMemory();
             break;
         } else {
-            printf("Processing Opcode: %s\n", IR);
+            printf("Processing Opcode: %.6s\n", IR);
             // Execute instruction
             if( processOpcode() == -1 ) {
                 printf("Exception encountered. Program terminated. \n");

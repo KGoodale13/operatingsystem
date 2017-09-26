@@ -7,6 +7,13 @@
 #include <string.h>
 #include "../kernel/memory.h"
 
+// If we read a program that's too large we need to wipe memory before returning so we can try to load the next file
+// without side effects
+void recoverFromBadFileRead( ){
+    memset( memory, 0, 100 * sizeof( memory[0] ) );
+    PC = 0;
+}
+
 int loadFile( char *filePath ) {
     printf( "Loading program:  %s\n", filePath );
 
@@ -21,6 +28,13 @@ int loadFile( char *filePath ) {
     ssize_t readReturn;
     while( ( readReturn = read( fileHandle, input_buffer, 7 ) ) > 0   ) {
         input_buffer[ strcspn( input_buffer, "\r\n" ) ] = 0; // Pesky new line chars at EOF. Source: https://stackoverflow.com/questions/2693776/
+
+        if( PC >= 99 ){
+            printf("Error: Memory overflowed while reading file into memory. Discarding file and wiping main memory... \n");
+            recoverFromBadFileRead();
+            return -1;
+        }
+
         strcpy( memory[ PC ], input_buffer ); // Load this line of the program into memory
         PC++;
     }

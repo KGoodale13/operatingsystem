@@ -178,6 +178,7 @@ int setPSW( int bool ){
         printf("Error: Invalid value passed to setPSW. Expected 1 or 0, Got: %i\n", bool);
         return -1;
     }
+    PSW[0] = (char)(bool + '0');
     return 0;
 }
 

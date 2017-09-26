@@ -19,6 +19,4 @@ If you don’t have cmake install it with:
 
 Troubleshooting:
 
-“Program file not found”: Make sure you are running the application from the project root and not from inside the bin dir. i.e run it with `bin/operatingsystem` not `./operatingsystem’. If that doesn’t work make sure your program is in the programs/Program1 file. 
-
-
+“Program file not found”: Make sure you are passing a valid path to a PBRAIN program file.
