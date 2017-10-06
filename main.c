@@ -1,15 +1,16 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include <libgen.h>
 
+#include "kernel/executionContext.h"
+#include "kernel/processControlBlock.h"
 #include "loader/fileloader.h"
-#include "kernel/memory.h"
-#include "kernel/opcodes.h"
+
 
 /**
- * Entry point for running the os. Argv[0] is expected to be the absolute path to
- * the compiled executable
+ * Entry point for running the os.
+ * argv should contain paths to each program you want to load
+ * @author: Kyle Goodale
  * @return:
  *          0: Program finished running with no errors
  *         -1: Program encountered an error. The error should be printed to console
@@ -20,23 +21,29 @@ int main( int argc, char* argv[] ) {
     int argIndex = 0; // Current index we are trying
     int fileLoaded = false; // Whether we loaded a file
 
-    // Attempt to load a program from a path passed as a launch arg
-    while( argIndex < argc && !fileLoaded ) {
+    // Load any valid program passed as a startup param into memory
+    while( argIndex < argc ) {
         char *programFile = argv[ argIndex ];
-        printf( "Attempting to load program: %s\n", programFile );
 
-        if( loadFile( programFile ) == 0 ) { // Load the file into main memory
-            fileLoaded = true;
+        // Create a new process for our program to be loaded into
+        int processId = newPCB();
+        if( processId == -1 ){
+            printf( "Process creation failed. Aborting current program loading. \n");
+            continue;
         }
+
+        ExecutionContext_SwitchProcess( processId );
+
+        if( loadFile( programFile ) == -1 ) { // Load the file into main memory
+            printf("Error: Program %s failed to load. Destroying associated PID %i\n", programFile, getPID());
+            destroyPCB( processId );
+        }
+
         argIndex++;
     }
 
-    if( !fileLoaded ){
-        printf( "ERROR: No valid program found in launch arguments. Unable to continue. Terminating....\n" );
-        return -1;
-    }
 
-    PC = 0; // Reset the program counter to the beginning of the program
+    PC = 0; // Reset the program counter to the begining of the program
 
     while ( true ) { // OS loop
         // fetch current instruction and copy to ir
