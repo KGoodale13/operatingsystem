@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 
+#include "kernel/scheduler.h"
 #include "kernel/executionContext.h"
 #include "kernel/processControlBlock.h"
 #include "loader/fileloader.h"
+#include "kernel/memory.h"
 
 
 /**
@@ -18,8 +18,8 @@
 
 int main( int argc, char* argv[] ) {
 
-    int argIndex = 0; // Current index we are trying
-    int fileLoaded = false; // Whether we loaded a file
+    int argIndex = 1; // Current index we are trying
+    int fileLoaded = 0; // Whether we loaded a file
 
     // Load any valid program passed as a startup param into memory
     while( argIndex < argc ) {
@@ -36,34 +36,19 @@ int main( int argc, char* argv[] ) {
 
         if( loadFile( programFile ) == -1 ) { // Load the file into main memory
             printf("Error: Program %s failed to load. Destroying associated PID %i\n", programFile, getPID());
-            destroyPCB( processId );
+            removePCBNode( processId );
         }
+        fileLoaded = 1;
+        Scheduler_Queue_Process( processId );
 
         argIndex++;
     }
-
-
-    PC = 0; // Reset the program counter to the begining of the program
-
-    while ( true ) { // OS loop
-        // fetch current instruction and copy to ir
-        strncpy( IR, memory[ PC ], 6 );
-
-        if( strncmp( IR, "99ZZZZ", 6 ) == 0 || IR[0] == '\0'  ){ // Check for program ending
-            printf("Program execution complete \n");
-            dumpMemory();
-            break;
-        } else {
-            printf("Processing Opcode: %.6s\n", IR);
-            // Execute instruction
-            if( processOpcode() == -1 ) {
-                printf("Exception encountered. Program terminated. \n");
-                return -1;
-            }
-            PC++;
-        }
-
+    if( fileLoaded == 0 ){
+        printf("Error: No valid program files loaded. Terminating... \n");
+        return -1;
     }
 
+    Scheduler_Start( CONTINUE_ON_ERROR );
+    _debug_dumpMemory();
     return 0;
 }

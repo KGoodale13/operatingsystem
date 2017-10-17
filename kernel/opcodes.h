@@ -12,7 +12,6 @@
 #ifndef OPERATINGSYSTEM_OPCODES_H
 #define OPERATINGSYSTEM_OPCODES_H
 
-#endif //OPERATINGSYSTEM_OPCODES_H
 
 /**
  * Reads the current program line from memory using the PC ( program counter ) and parses and handles the opcode
@@ -20,3 +19,5 @@
  * @return -1 if the opcode is invalid, 0 on success and 1 if it reaches the halt opcode
  */
 int processOpcode( );
+
+#endif //OPERATINGSYSTEM_OPCODES_H

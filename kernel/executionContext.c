@@ -1,9 +1,13 @@
 // Created by Kyle Goodale. See header for details
 
-#include <printf.h>
+
 #include "../util/util.h"
 #include "executionContext.h"
 #include "processControlBlock.h"
+#include "memory.h"
+
+#include <printf.h>
+#include <string.h>
 
 static PCB *CurrentPCB = NULL;
 
@@ -15,17 +19,17 @@ int ExecutionContext_SwitchProcess( int PID ){
         return -1;
     }
     CurrentPCB = NewPCB;
+
+    if( CurrentPCB->PC == 0 ){ // We need a priming load because the IR wont be loaded initially
+        loadIR();
+    }
+
     return 0;
 }
 
 // Returns the current executing processes id
 int getPID(){
     return CurrentPCB == NULL ? -1 : CurrentPCB->PID;
-}
-
-// Returns the Instruction register of the CurrentPCB
-char *getIR(){
-    return CurrentPCB->IR;
 }
 
 // Retrieves the memory location stored at a pointer
@@ -107,7 +111,7 @@ int writeValueToMemory( int location, int value ){
         return -1;
     }
 
-    return memoryWriteValue( location + CurrentPCB->BaseReg, value  );
+    return _memoryWriteValue( location + CurrentPCB->BaseReg, value  );
 }
 
 // Reads a number from memory that is in the format ZZXXXX where X:{0-9}
@@ -117,7 +121,7 @@ int readValueFromMemory( int location ) {
         return -1;
     }
 
-   return memoryReadValue( location + CurrentPCB->BaseReg );
+   return _memoryReadValue( location + CurrentPCB->BaseReg );
 }
 
 // Writes the line passed into the OS memory with respect to the CurrentPCB's base memory address
@@ -126,7 +130,7 @@ int writeLineToMemory( int location, char* line ) {
         printf("Error: Attempted to read value from invalid memory location. Expected (0-%i), Got: %i\n", MAX_MEM_PER_PROC, location);
         return -1;
     }
-    return memoryWriteLine( CurrentPCB->BaseReg + location, line );
+    return _memoryWriteLine( CurrentPCB->BaseReg + location, line );
 }
 
 // Reads an entire line directly from memory with no formatting or parsing
@@ -135,7 +139,7 @@ char *readLineFromMemory( int location ) {
         printf("Error: Attempted to read value from invalid memory location. Expected (0-%i), Got: %i\n", MAX_MEM_PER_PROC, location);
         return NULL;
     }
-    return memoryReadLine( CurrentPCB->BaseReg + location );
+    return _memoryReadLine( CurrentPCB->BaseReg + location );
 }
 
 // Gets the value stored in memory that the pointer points to
@@ -191,4 +195,48 @@ int branch( short int line ){
     }
     CurrentPCB->PC = (short)(line - 1); // Because we increase the PC after this opcode completes
     return 0;
+}
+
+int incrementPC(){
+    short newVal = (short)(CurrentPCB->PC + 1);
+    if( newVal < 0 || newVal >= MAX_MEM_PER_PROC ){
+        printf("Error: Attempted to set PC to out of bounds number Expected 0-%i, Got: %i\n", MAX_MEM_PER_PROC, newVal);
+        return  -1;
+    }
+    CurrentPCB->PC = newVal;
+    loadIR();
+    return 0;
+}
+
+// increments the pc and checks the IR value to see if we have reached the EOF or EOP
+int PCNextLine(){
+    if( incrementPC() == -1 ){
+        return -1;
+    }
+
+    if( strncmp( CurrentPCB->IR, "99ZZZZ", 6 ) == 0 || CurrentPCB->IR[0] == '\0'  ){ // Check for program ending
+       return 1;
+    }
+
+    return 0;
+}
+
+int setPC( int pc ){
+    if( pc < 0 || pc >= MAX_MEM_PER_PROC ){
+        printf("Error: Attempted to set PC to out of bounds number Expected 0-%i, Got: %i\n", MAX_MEM_PER_PROC, pc);
+        return  -1;
+    }
+    CurrentPCB->PC = (short)( pc );
+    loadIR();
+    return 0;
+}
+
+int loadIR() {
+    strncpy( CurrentPCB->IR, _memoryReadLine( CurrentPCB->BaseReg + CurrentPCB->PC ), 6 );
+    return 0;
+}
+
+// Returns the Instruction register of the CurrentPCB
+char *getIR(){
+    return CurrentPCB->IR;
 }

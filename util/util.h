@@ -15,4 +15,4 @@
  */
 int parseArray( const char arr[], int start, int len );
 
-#endif OPERATINGSYSTEM_UTIL_H
+#endif //OPERATINGSYSTEM_UTIL_H

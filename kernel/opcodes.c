@@ -79,7 +79,7 @@ static short int getOperandType( int operandIndex ){
         printf("ERROR: Invalid operand index passed to getOperandType. Expected 1 - 4 got: %i\n", operandIndex );
         return -1;
     }
-    return charToOperandType( getIR[ operandIndex  ] );
+    return charToOperandType( getIR()[ operandIndex  ] );
 }
 
 

@@ -23,6 +23,9 @@ int getPID();
 // Returns the instruction register
 char *getIR();
 
+// loads the IR with the current line at PC
+int loadIR();
+
 
 /**************************************************************************************
  *    Functions for interacting with the current processes PCB and memory locations  **
@@ -143,12 +146,23 @@ int getPSW();
  */
 int branch( short int value );
 
+
 /**
- * Compares the accumulators value to the value passed based on the comparison type enum passed
- * @param value - The value to compare
- * @return 0 -> False, 1 -> True, -1 -> Error
+ * Increments the program counter
+ * @return 0-> On success, -1 -> Error
  */
-int accCompare( int value, short int comparisonType );
+int incrementPC();
 
+/**
+ * Increments the program counter
+ * @return 0-> On success, -1 -> Error
+ */
+int incrementPC();
 
-#endif OPERATINGSYSTEM_EXECUTIONCONTEXT_H
+/**
+ * Increments the PC and loads the next line into the IR, then checks the IR for line ending
+ * @return 0 -> on success, 1 -> End reached, -1 -> On Error
+ */
+int PCNextLine();
+
+#endif //OPERATINGSYSTEM_EXECUTIONCONTEXT_H

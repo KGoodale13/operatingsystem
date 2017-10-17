@@ -1,7 +1,3 @@
-# operatingsystem
-
-This application runs a made up assembly code called "PBrain". It's a project for my COS331 class and a WIP.
-
 Easiest way to build this is using `cmake`
 
 If you don’t have cmake install it with:
@@ -15,7 +11,6 @@ If you don’t have cmake install it with:
 - Build the project using `make`
 
 - Run the project `bin/operatingsystem`
- 
 
 Troubleshooting:
 

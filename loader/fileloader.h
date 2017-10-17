@@ -15,5 +15,5 @@
  */
 int loadFile( char *filePath );
 
-#endif OPERATINGSYSTEM_FILELOADER_H
+#endif //OPERATINGSYSTEM_FILELOADER_H
 

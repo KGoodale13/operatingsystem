@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "../util/util.h"
 
+const int MEMORY_LINES = 1000; // How many rows of memory we have
 
 static char memory[ MEMORY_LINES ][ 6 ]; // Our operating systems main memory. Shared by all programs
 

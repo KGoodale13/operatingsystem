@@ -12,7 +12,7 @@
 #ifndef OPERATINGSYSTEM_MEMORY_H
 #define OPERATINGSYSTEM_MEMORY_H
 
-const int MEMORY_LINES = 1000; // How many rows of memory we have
+extern const int MEMORY_LINES; // How many rows of memory we have
 
 // Dumps main memory to console for debugging purposes
 void _debug_dumpMemory();
@@ -55,4 +55,4 @@ int _memoryWriteValue( int location, int value );
  */
 int _memoryClearBlock( int fromLocation, int lines );
 
-#endif OPERATINGSYSTEM_MEMORY_H
+#endif //OPERATINGSYSTEM_MEMORY_H

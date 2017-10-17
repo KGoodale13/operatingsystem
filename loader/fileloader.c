@@ -5,8 +5,9 @@
 #include <sys/errno.h>
 #include <unistd.h>
 #include <string.h>
+
+#include "../kernel/processControlBlock.h"
 #include "../kernel/executionContext.h"
-#include "../kernel/ProcessControlBlock.h"
 
 int loadFile( char *filePath ) {
     printf( "Loading program:  %s into memory owned by pid %i\n", filePath, getPID() );

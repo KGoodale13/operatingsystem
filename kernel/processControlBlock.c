@@ -1,11 +1,14 @@
 // Created by Kyle Goodale. See header for details
 
 #include "processControlBlock.h"
+#include "memory.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <printf.h>
 
 int ProcessCount = 0; // How many processes we currently have
+const int MAX_PROCESSES = 10;
+const int MAX_MEM_PER_PROC = 100; // How many lines each process gets in main memory
 
 // The PCBNode struct is just a wrapper around the PCB struct that contains a link to the next PCB.
 // We use a separate struct because we shouldn't and don't need to expose that externally.
@@ -17,10 +20,9 @@ struct PCBNode {
 
 // The head and Tail of our PCB linked list
 PCBNode *PCBListHead = NULL;
-PCBNode *PCBListTail = NULL;
 
 // Find the node and remove it and set its previous node to the current nodes next, 0 on success, -1 on not found
-static int removePCBNode( int PID ){
+int removePCBNode( int PID ){
 
     struct PCBNode *CurrentNode = PCBListHead;
     struct PCBNode *PreviousNode = NULL;
@@ -32,7 +34,7 @@ static int removePCBNode( int PID ){
                 PreviousNode->NextPCB = CurrentNode->NextPCB;
             }
             // Free our memory
-            free( CurrentNode->pcb );
+            destroyPCB( CurrentNode->pcb );
             free( CurrentNode );
             return 0;
         }
@@ -43,7 +45,6 @@ static int removePCBNode( int PID ){
 }
 
 PCB *getPCB( int PID ){
-
     struct PCBNode *CurrentNode = PCBListHead;
     while( CurrentNode != NULL ) {
         if( CurrentNode->pcb->PID == PID ){
@@ -52,7 +53,6 @@ PCB *getPCB( int PID ){
         CurrentNode = CurrentNode->NextPCB;
     }
     return NULL; // PCB with that PID not found
-
 }
 
 // Creates a new pcb and pcbnode and adds it to the linked list
@@ -81,24 +81,24 @@ int newPCB() {
     NewPCBNode->pcb = NewPCB;
     NewPCBNode->NextPCB = NULL;
 
-    // Set the current tails next PCB to this element, or if this is the first element added to the list set the tail
-    if( PCBListTail != NULL ) {
-        PCBListTail->NextPCB = NewPCBNode;
-    } else { // For the first element in the list
-        PCBListTail = NewPCBNode;
+    // Insert our node into the end of the linked list
+    if( PCBListHead == NULL ){ // This is the first element
+        PCBListHead = NewPCBNode;
+    } else {
+        PCBNode *CurrentPCBNode = PCBListHead;
+        while (CurrentPCBNode->NextPCB != NULL) {
+            CurrentPCBNode = CurrentPCBNode->NextPCB;
+        }
+        CurrentPCBNode->NextPCB = NewPCBNode;
     }
+
 
     return NewPCB->PID;
 }
 
 
-int destroyPCB( int PID ){
-    PCB *targetPCB = getPCB( PID );
-    if( targetPCB == NULL ){
-        printf("Error: Attempted to destroy unknown process %i\n", PID);
-        return -1;
-    }
-    memoryClearBlock( targetPCB->BaseReg, MAX_MEM_PER_PROC );
-    return removePCBNode( targetPCB->PID );
+static void destroyPCB( PCB* targetPCB ){
+    _memoryClearBlock( targetPCB->BaseReg, MAX_MEM_PER_PROC );
+    free( targetPCB );
 }
 
