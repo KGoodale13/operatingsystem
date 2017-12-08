@@ -4,7 +4,9 @@
 #include "../util/util.h"
 #include "executionContext.h"
 #include "processControlBlock.h"
+#include "semaphore.h"
 #include "memory.h"
+#include "scheduler.h"
 
 #include <printf.h>
 #include <string.h>
@@ -239,4 +241,40 @@ int loadIR() {
 // Returns the Instruction register of the CurrentPCB
 char *getIR(){
     return CurrentPCB->IR;
+}
+
+// FORK
+int fork(){
+    int forkPID = forkPCB( CurrentPCB ); // Fork the current PCB
+    Scheduler_Queue_Process( forkPID ); // Add it to the scheduler
+    return 0;
+}
+
+// Used for system calls from brain (op36)
+int trapInstruction( int opcode, int register2Index ) {
+    printf("trap called with opcode %i\n", opcode );
+
+    if( opcode == 1 ){ // Wait
+        int semaphore = 0;
+        int value = getRegister( register2Index );
+        if( value == 0 ){ // Fork semaphore
+            semaphore = getAccumulator();
+        } else { // Doorman semaphore
+            semaphore = 6;
+        }
+        Semaphore_Wait( getPID(), semaphore);
+    } else if ( opcode == 2 ){ // Signal
+        Semaphore_Signal( getPID(), getRegister( register2Index ) );
+    } else if ( opcode == 3 ){ // Get PID
+        setRegister( register2Index, getPID() );
+    } else {
+        printf("Unknown opcode %i passed to trap. Unable to continue\n", opcode );
+        return -1;
+    }
+    return 0;
+}
+
+int modulo( int a, int b ) {
+    setAccumulator( a % b );
+    return 0;
 }

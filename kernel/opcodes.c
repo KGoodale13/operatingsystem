@@ -151,7 +151,7 @@ static int OP7( ){
 
 static int OP8( ){
     return ( checkOperandType( 1, OPERAND_REGISTER ) + checkOperandType( 2, OPERAND_POINTER ) == 0 ) ?
-           writeValueToMemory( getPointer( getOperandIndex( 1 ) ), getRegister( getOperandIndex( 2 ) ) ): -1;
+           writeValueToMemory( getPointer( getOperandIndex( 2 ) ), getRegister( getOperandIndex( 1 ) ) ): -1;
 }
 
 static int OP9( ){
@@ -289,6 +289,21 @@ static int OP35() {
            ( getPSW() == 1 ? branch( getOperand1() ) : 0 ) : -1;
 }
 
+static int OP36() {
+    return  ( checkOperandType( 1, OPERAND_REGISTER ) + checkOperandType( 2, OPERAND_REGISTER ) == 0 ) ?
+            trapInstruction( getRegister( getOperandIndex(1) ), getOperandIndex(2) ) : -1;
+}
+
+static int OP37() {
+    return  ( checkOperandType( 1, OPERAND_REGISTER ) + checkOperandType( 2, OPERAND_REGISTER ) == 0 ) ?
+            modulo( getRegister( getOperandIndex(1) ), getRegister( getOperandIndex(2) ) ) : -1;
+
+}
+
+// Our null opcode, does nothing but still counts towards the instruction counter. (Used for testing)
+static int OP38() {
+    return 0;
+}
 
 
 int processOpcode( ) {
@@ -330,6 +345,9 @@ int processOpcode( ) {
         case 33: return OP33( );
         case 34: return OP34( );
         case 35: return OP35( );
+        case 36: return OP36( );
+        case 37: return OP37( );
+        case 38: return OP38( );
         case 99: return 1;
         default:
             printf("Error: Unknown opcode %i program terminated.\n", getOpcode() );

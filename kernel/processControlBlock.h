@@ -1,7 +1,7 @@
 
 
 #ifndef OPERATINGSYSTEM_PROCESSCONTROLBLOCK_H
-#define OPERATINGSYSTEM_PROCESSCONTROLBLOCK_H
+#define OPERATINGSYSTEM_PROCESSCONTROLBLOCK_H/
 
 // The struct we will use to store memory associated with the current state of the program running
 typedef struct {
@@ -46,6 +46,12 @@ static void destroyPCB( PCB *PCB );
  */
 int removePCBNode( int PID );
 
+
+/**
+ * Forks the current PCB, creating a copy of the current PCB and setting it to use the same
+ * memory and also setting the PC to PC + 1
+ */
+int forkPCB( PCB *PCB );
 
 // Dumps the entire PCB linked list and information about each PCB. Useful for debugging
 void _debug_DumpPCBs();

@@ -165,4 +165,29 @@ int incrementPC();
  */
 int PCNextLine();
 
+
+/**
+ * Sets the Program Counter (PC) to the value passed
+ * @param pc -  The value to set the PC to
+ * @return 0->success, -1->Error
+ */
+int setPC( int pc );
+
+
+/**
+ * Used for making system calls from brain
+ * @param value - The value for the operation
+ * @param operand - The opcode we should run
+ * @return 0->success, -1->Error
+ */
+int trapInstruction( int value, int opcode );
+
+
+/**
+ * Modulo op ( A % B = ? ) The result is stored in the ACC
+ * @param a
+ * @param b
+ */
+int modulo( int a, int b );
+
 #endif //OPERATINGSYSTEM_EXECUTIONCONTEXT_H

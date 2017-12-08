@@ -28,4 +28,14 @@ void Scheduler_Queue_Process( int PID );
  */
 int Scheduler_Start( enum error_handle error_handler );
 
+
+// Removes the pid from the schedulers queue
+void Scheduler_Remove( int pid );
+
+// Sets the waiting status of the PID ( if the process is waiting for a semaphore )
+void Scheduler_Process_SetWaiting( int pid, int waiting );
+
+// Override the IC to use a static value instead of random
+void Scheduler_OverrideIC( int ic );
+
 #endif //OPERATINGSYSTEM_SCHEDULER_H

@@ -93,7 +93,22 @@ int newPCB() {
     }
 
 
+
+
     return NewPCB->PID;
+}
+
+int forkPCB( PCB *originalPCB ) {
+
+    // Create our fork process and set the values needed to match our original process
+    int pid = newPCB();
+    PCB* pcb = getPCB( pid );
+    pcb->PC = (short)(originalPCB->PC + 1);
+    pcb->BaseReg = originalPCB->BaseReg;
+    pcb->LimitReg = originalPCB->LimitReg;
+
+    return pid;
+
 }
 
 
